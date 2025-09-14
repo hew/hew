@@ -1,0 +1,64 @@
+name: Update Latest Gist
+
+on:
+  schedule:
+    # Runs every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Fetch Latest Gist
+      id: gist
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const gists = await github.rest.gists.listForUser({
+            username: 'hew',
+            per_page: 1
+          });
+
+          if (gists.data.length > 0) {
+            const latest = gists.data[0];
+            const title = latest.description || Object.keys(latest.files)[0];
+            const url = latest.html_url;
+            const truncatedDesc = latest.description ?
+              (latest.description.length > 100 ?
+                latest.description.substring(0, 97) + '...' :
+                latest.description) :
+              'Latest thoughts and explorations';
+
+            core.setOutput('title', title);
+            core.setOutput('url', url);
+            core.setOutput('description', truncatedDesc);
+          }
+
+    - name: Update README
+      if: steps.gist.outputs.url
+      run: |
+        # Read the README
+        README_PATH="README.md"
+
+        # If README.md doesn't exist in the repo root (for profile repos), create it
+        if [ ! -f "$README_PATH" ]; then
+          cp README-GITHUB-PROFILE.md README.md
+          README_PATH="README.md"
+        fi
+
+        # Create the new gist content
+        NEW_GIST="### 📝 [${{ steps.gist.outputs.title }}](${{ steps.gist.outputs.url }})\n*${{ steps.gist.outputs.description }}*"
+
+        # Update the content between the markers
+        sed -i '/<!-- GIST:START -->/,/<!-- GIST:END -->/c\<!-- GIST:START -->\n'"$NEW_GIST"'\n<!-- GIST:END -->' "$README_PATH"
+
+    - name: Commit and Push
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update latest gist" && git push)
