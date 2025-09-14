@@ -4,18 +4,6 @@
 
 I'm obsessed with where technical excellence meets refined design. Building thoughtful digital products that blend cutting-edge technology with human-centered experiences.
 
-## What I'm About
-
-Product-focused engineer with entrepreneurial DNA. I build systems that scale, interfaces that breathe, and products that matter. From OCaml's functional elegance to React's component paradigms, I choose tools that respect both developer experience and user outcomes.
-
-## Current Focus
-
-### 🚀 Stalker
-*Borderline creepy sales intelligence* - Currently in beta, revolutionizing how sales teams gather and leverage prospect insights.
-
-### 💡 Open to New Projects
-Fixed-rate engagements. Clear scope. Delivered fast. I leverage AI tools for 10x efficiency while maintaining the judgment and business acumen that only human expertise provides.
-
 ## Latest Writing
 
 <!-- GIST:START -->
@@ -29,10 +17,6 @@ Fixed-rate engagements. Clear scope. Delivered fast. I leverage AI tools for 10x
 
 > "Weniger, aber besser" - Less, but better
 
-Good code, like good design, is obvious in its simplicity and transparent in its function. Strong advocate for AI-enhanced development - I see LLMs not as replacements but as amplifiers of human creativity.
+--- 
 
-## Let's Connect
-
-- 📧 [hello@matthewjones.dev](mailto:hello@matthewjones.dev)
-- 🔗 [LinkedIn](https://linkedin.com/in/hewjones)
-- 🌐 [Portfolio](https://matthewjones.space)
+🔗 [https://matthewjones.space](https://matthewjones.space)
