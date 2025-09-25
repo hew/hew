@@ -17,6 +17,7 @@ jobs:
       id: gist
       uses: actions/github-script@v6
       with:
+        github-token: ${{ secrets.GIST_TOKEN }}
         script: |
           const gists = await github.rest.gists.listForUser({
             username: 'hew',
