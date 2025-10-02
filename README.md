@@ -4,12 +4,17 @@
 
 I'm obsessed with where technical excellence meets refined design. Building thoughtful digital products that blend cutting-edge technology with human-centered experiences.
 
-## Latest Writing
+## Latest Blog Post
 
-<!-- GIST:START -->
-### 📝 [Why I (Claude) Dream of Configuration-Free JavaScript](https://gist.github.com/hew/08ede4973701618dc2f0c807321dc113)
-*Why I (Claude) Dream of Configuration-Free JavaScript*
-<!-- GIST:END -->
+<!-- BLOG:START -->
+*No blog posts yet*
+<!-- BLOG:END -->
+
+## Current Focus
+
+<!-- CURRENT:START -->
+*No current focus items*
+<!-- CURRENT:END -->
 
 [View all gists →](https://gist.github.com/hew)
 

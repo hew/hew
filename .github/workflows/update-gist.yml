@@ -9,38 +9,67 @@ on:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Fetch Latest Gist
-      id: gist
+    - name: Fetch and Filter Gists
+      id: gists
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GIST_TOKEN }}
         script: |
+          // Fetch more gists to find the ones with prefixes
           const gists = await github.rest.gists.listForUser({
             username: 'hew',
-            per_page: 1
+            per_page: 30  // Fetch enough to find prefixed ones
           });
 
-          if (gists.data.length > 0) {
-            const latest = gists.data[0];
-            const title = latest.description || Object.keys(latest.files)[0];
-            const url = latest.html_url;
-            const truncatedDesc = latest.description ?
-              (latest.description.length > 100 ?
-                latest.description.substring(0, 97) + '...' :
-                latest.description) :
-              'Latest thoughts and explorations';
+          let latestBlog = null;
+          let currentFocus = [];
 
-            core.setOutput('title', title);
-            core.setOutput('url', url);
-            core.setOutput('description', truncatedDesc);
+          for (const gist of gists.data) {
+            const desc = gist.description || '';
+
+            // Find latest blog post
+            if (!latestBlog && desc.startsWith('[blog]')) {
+              latestBlog = {
+                title: desc.replace('[blog]', '').trim() || Object.keys(gist.files)[0],
+                url: gist.html_url,
+                description: desc.replace('[blog]', '').trim()
+              };
+            }
+
+            // Find current focus items (up to 3)
+            if (currentFocus.length < 3 && desc.startsWith('[current]')) {
+              currentFocus.push({
+                title: desc.replace('[current]', '').trim() || Object.keys(gist.files)[0],
+                url: gist.html_url
+              });
+            }
+
+            // Stop if we have everything we need
+            if (latestBlog && currentFocus.length >= 3) {
+              break;
+            }
           }
 
+          // Format outputs for use in bash
+          if (latestBlog) {
+            core.setOutput('blog_title', latestBlog.title);
+            core.setOutput('blog_url', latestBlog.url);
+            core.setOutput('blog_description', latestBlog.description.length > 100 ?
+              latestBlog.description.substring(0, 97) + '...' :
+              latestBlog.description);
+          }
+
+          // Output current focus as JSON string
+          core.setOutput('current_focus', JSON.stringify(currentFocus));
+
     - name: Update README
-      if: steps.gist.outputs.url
+      if: steps.gists.outputs.blog_url || steps.gists.outputs.current_focus != '[]'
       run: |
         # Read the README
         README_PATH="README.md"
@@ -51,11 +80,31 @@ jobs:
           README_PATH="README.md"
         fi
 
-        # Create the new gist content
-        NEW_GIST="### 📝 [${{ steps.gist.outputs.title }}](${{ steps.gist.outputs.url }})\n*${{ steps.gist.outputs.description }}*"
+        # Create the blog content
+        if [ -n "${{ steps.gists.outputs.blog_url }}" ]; then
+          BLOG_CONTENT="### 📝 [${{ steps.gists.outputs.blog_title }}](${{ steps.gists.outputs.blog_url }})\n*${{ steps.gists.outputs.blog_description }}*"
+        else
+          BLOG_CONTENT="*No blog posts yet*"
+        fi
 
-        # Update the content between the markers
-        sed -i '/<!-- GIST:START -->/,/<!-- GIST:END -->/c\<!-- GIST:START -->\n'"$NEW_GIST"'\n<!-- GIST:END -->' "$README_PATH"
+        # Create the current focus content
+        CURRENT_JSON='${{ steps.gists.outputs.current_focus }}'
+        if [ "$CURRENT_JSON" != "[]" ] && [ -n "$CURRENT_JSON" ]; then
+          CURRENT_CONTENT=""
+          echo "$CURRENT_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | while read -r line; do
+            CURRENT_CONTENT="${CURRENT_CONTENT}${line}\n"
+          done
+          # Use a different approach with jq
+          CURRENT_CONTENT=$(echo "$CURRENT_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | sed ':a;N;$!ba;s/\n/\\n/g')
+        else
+          CURRENT_CONTENT="*No current focus items*"
+        fi
+
+        # Update the blog section
+        sed -i '/<!-- BLOG:START -->/,/<!-- BLOG:END -->/c\<!-- BLOG:START -->\n'"$BLOG_CONTENT"'\n<!-- BLOG:END -->' "$README_PATH"
+
+        # Update the current focus section
+        sed -i '/<!-- CURRENT:START -->/,/<!-- CURRENT:END -->/c\<!-- CURRENT:START -->\n'"$CURRENT_CONTENT"'\n<!-- CURRENT:END -->' "$README_PATH"
 
     - name: Commit and Push
       run: |
