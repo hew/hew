@@ -28,7 +28,7 @@ jobs:
           });
 
           let latestBlog = null;
-          let currentFocus = [];
+          let reels = [];
 
           for (const gist of gists.data) {
             const desc = gist.description || '';
@@ -43,15 +43,15 @@ jobs:
             }
 
             // Find reel items (up to 3)
-            if (currentFocus.length < 3 && desc.startsWith('[reel]')) {
-              currentFocus.push({
+            if (reels.length < 3 && desc.startsWith('[reel]')) {
+              reels.push({
                 title: desc.replace('[reel]', '').trim() || Object.keys(gist.files)[0],
                 url: gist.html_url
               });
             }
 
             // Stop if we have everything we need
-            if (latestBlog && currentFocus.length >= 3) {
+            if (latestBlog && reels.length >= 3) {
               break;
             }
           }
@@ -65,11 +65,11 @@ jobs:
               latestBlog.description);
           }
 
-          // Output current focus as JSON string
-          core.setOutput('current_focus', JSON.stringify(currentFocus));
+          // Output reels as JSON string
+          core.setOutput('reels', JSON.stringify(reels));
 
     - name: Update README
-      if: steps.gists.outputs.blog_url || steps.gists.outputs.current_focus != '[]'
+      if: steps.gists.outputs.blog_url || steps.gists.outputs.reels != '[]'
       run: |
         # Read the README
         README_PATH="README.md"
@@ -87,28 +87,28 @@ jobs:
           BLOG_CONTENT="*No blog posts yet*"
         fi
 
-        # Create the current focus content
-        CURRENT_JSON='${{ steps.gists.outputs.current_focus }}'
-        if [ "$CURRENT_JSON" != "[]" ] && [ -n "$CURRENT_JSON" ]; then
-          CURRENT_CONTENT=""
-          echo "$CURRENT_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | while read -r line; do
-            CURRENT_CONTENT="${CURRENT_CONTENT}${line}\n"
+        # Create the reels content
+        REELS_JSON='${{ steps.gists.outputs.reels }}'
+        if [ "$REELS_JSON" != "[]" ] && [ -n "$REELS_JSON" ]; then
+          REELS_CONTENT=""
+          echo "$REELS_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | while read -r line; do
+            REELS_CONTENT="${REELS_CONTENT}${line}\n"
           done
           # Use a different approach with jq
-          CURRENT_CONTENT=$(echo "$CURRENT_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | sed ':a;N;$!ba;s/\n/\\n/g')
+          REELS_CONTENT=$(echo "$REELS_JSON" | jq -r '.[] | "- [\(.title)](\(.url))"' | sed ':a;N;$!ba;s/\n/\\n/g')
         else
-          CURRENT_CONTENT="*No current focus items*"
+          REELS_CONTENT="*No reels*"
         fi
 
         # Update the blog section
         sed -i '/<!-- BLOG:START -->/,/<!-- BLOG:END -->/c\<!-- BLOG:START -->\n'"$BLOG_CONTENT"'\n<!-- BLOG:END -->' "$README_PATH"
 
-        # Update the current focus section
-        sed -i '/<!-- CURRENT:START -->/,/<!-- CURRENT:END -->/c\<!-- CURRENT:START -->\n'"$CURRENT_CONTENT"'\n<!-- CURRENT:END -->' "$README_PATH"
+        # Update the reel section
+        sed -i '/<!-- REEL:START -->/,/<!-- REEL:END -->/c\<!-- REEL:START -->\n'"$REELS_CONTENT"'\n<!-- REEL:END -->' "$README_PATH"
 
     - name: Commit and Push
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update latest gist" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update blog and reels content" && git push)

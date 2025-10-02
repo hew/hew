@@ -10,11 +10,11 @@ I'm obsessed with where technical excellence meets refined design. Building thou
 *No blog posts yet*
 <!-- BLOG:END -->
 
-## Current Focus
+## Reels
 
-<!-- CURRENT:START -->
-*No current focus items*
-<!-- CURRENT:END -->
+<!-- REEL:START -->
+*No reels*
+<!-- REEL:END -->
 
 [View all gists →](https://gist.github.com/hew)
 
@@ -25,3 +25,4 @@ I'm obsessed with where technical excellence meets refined design. Building thou
 --- 
 
 🔗 [https://matthewjones.space](https://matthewjones.space)
+📖 [https://matthewjones.space](https://matthewjones.space/blog)
