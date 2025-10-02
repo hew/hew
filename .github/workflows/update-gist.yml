@@ -42,10 +42,10 @@ jobs:
               };
             }
 
-            // Find current focus items (up to 3)
-            if (currentFocus.length < 3 && desc.startsWith('[current]')) {
+            // Find reel items (up to 3)
+            if (currentFocus.length < 3 && desc.startsWith('[reel]')) {
               currentFocus.push({
-                title: desc.replace('[current]', '').trim() || Object.keys(gist.files)[0],
+                title: desc.replace('[reel]', '').trim() || Object.keys(gist.files)[0],
                 url: gist.html_url
               });
             }
