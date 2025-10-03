@@ -3,7 +3,7 @@
 #### Latest Blog Post
 
 <!-- BLOG:START -->
-[Exploring the MCP Server Functionality in the AI-SDK](https://gist.github.com/hew/69d0cc7f8466022f710a9ffb5a5d03f3)
+### 📝 [Exploring the MCP Server Functionality in the AI-SDK](https://gist.github.com/hew/69d0cc7f8466022f710a9ffb5a5d03f3)
 *Exploring the MCP Server Functionality in the AI-SDK*
 <!-- BLOG:END -->
 
